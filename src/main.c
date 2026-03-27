@@ -1,17 +1,21 @@
 #include <stdio.h>
-#include "bst.c"
+#include "bst.h"
 
 
 int main(void)
 {
-    BST * tree = ___sampleBST();
-    int searchedKeys[] = {48, 58, 10};
-    const int searchedKeysN = 3;
-
-    for (int i = 0; i < searchedKeysN; i++)
+    BST * t = bst_new();
+    
+    KeyType keys[] = {50, 10, 70, 60, 80, 9, 11};
+    const size_t size = 7;
+    for (size_t i = 0; i < size; i++)
     {
-        printf("%d: %sfound\n", searchedKeys[i], search_iterative(tree, searchedKeys[i]) ? "" : "not");
+        bst_insert(t, keys[i]);
     }
+
+    bst_visualize(t);
+
+    bst_delete(t);
 
     return 0;
 }
