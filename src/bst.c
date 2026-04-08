@@ -3,9 +3,6 @@
 #include <stdlib.h>
 
 
-//-------------------------------------------------------------------------------------------------
-
-
 typedef struct Node
 {
     KeyType key;
@@ -18,9 +15,25 @@ struct BST
 };
 
 
-//-------------------------------------------------------------------------------------------------
+/// PRIVATE FUNCTIONS ...........................
 
+void deleteTree(Node * root)
+{
+    if (root == NULL) { return; }
+    
+    deleteTree(root->left);
+    deleteTree(root->right);
+    free(root);
+}
 
+bool isInTree(Node * root, KeyType key)
+{
+    if (root == NULL) { return false; }
+    if (key == root->key) { return true; }
+    
+    if (key < root->key) { return isInTree(root->left, key); }
+    return isInTree(root->right, key);
+}
 Node * newNode(KeyType key)
 {
     Node * newNode = malloc(sizeof(Node));
@@ -31,30 +44,54 @@ Node * newNode(KeyType key)
 
     return newNode;
 }
-void deleteTree(Node * root)
-{
-    if (root == NULL) { return; }
-
-    deleteTree(root->left);
-    deleteTree(root->right);
-    free(root);
-}
-
-bool isInTree(Node * root, KeyType key)
-{
-    if (root == NULL) { return false; }
-    if (key == root->key) { return true; }
-
-    if (key < root->key) { return isInTree(root->left, key); }
-    return isInTree(root->right, key);
-}
 Node * insertInTree(Node * root, KeyType key)
 {
     if (root == NULL) { return newNode(key); }
-
+    
     if (key < root->key) { root->left = insertInTree(root->left, key); }
     else if (key > root->key) { root->right = insertInTree(root->right, key); }
     
+    return root;
+}
+Node * minNode(Node * root)
+{
+    if (root == NULL) { return NULL; }
+    if (root->left == NULL) { return root; }
+
+    return minNode(root->left);
+}
+Node * successor(Node * node)
+{
+    return minNode(node->right);
+}
+Node * removeFromTree(Node * root, KeyType key)
+{
+    if (root == NULL) { return NULL; }
+
+    if (key < root->key) { root->left = removeFromTree(root->left, key); }
+    else if (key > root->key) { root->right = removeFromTree(root->right, key); }
+    else
+    {
+        if (root->left == NULL)
+        {
+            Node * trash = root;
+            root = root->right;
+            free(trash);
+        }
+        else if (root->right == NULL)
+        {
+            Node * trash = root;
+            root = root->left;
+            free(trash);
+        }
+        else
+        {
+            Node * succ = successor(root);
+            root->key = succ->key;
+            root->right = removeFromTree(root->right, succ->key);
+        }
+    }
+
     return root;
 }
 
@@ -91,10 +128,25 @@ void printTreeWithSpacing(Node * root, size_t level)
     printTreeWithSpacing(root->left, level + 1);
     printTreeWithSpacing(root->right, level + 1);
 }
+void printTreeWithSpacingAndLabels(Node * root, size_t level, int side)
+{
+    if (root == NULL) { return; }
+
+    for (size_t i = 0; i < level; i++) { printf("\t"); }
+    
+    switch (side)
+    {
+        case -1: printf("<< %d\n", root->key); break;
+        case 0: printf("%d\n", root->key); break;
+        case 1: printf(">> %d\n", root->key); break;
+    }
+
+    printTreeWithSpacingAndLabels(root->left, level + 1, -1);
+    printTreeWithSpacingAndLabels(root->right, level + 1, 1);
+}
 
 
-//-------------------------------------------------------------------------------------------------
-
+/// INTERFACE IMPLEMENTATION ....................
 
 BST * bst_new(void)
 {
@@ -114,15 +166,14 @@ bool bst_search(BST * bst, KeyType key)
 {
     return isInTree(bst->root, key);
 }
-BST * bst_insert(BST * bst, KeyType key)
+void bst_insert(BST * bst, KeyType key)
 {
     bst->root = insertInTree(bst->root, key);
-    return bst;
 }
-// BST * bst_remove(BST * bst, KeyType key)
-// {
-//     // ...
-// }
+void bst_remove(BST * bst, KeyType key)
+{
+    bst->root = removeFromTree(bst->root, key);
+}
 
 void bst_print_inOrder(BST * bst)
 {
@@ -141,6 +192,5 @@ void bst_print_postOrder(BST * bst)
 }
 void bst_visualize(BST * bst)
 {
-    printTreeWithSpacing(bst->root, 0);
-    printf("\n");
+    printTreeWithSpacingAndLabels(bst->root, 0, 0);
 }
