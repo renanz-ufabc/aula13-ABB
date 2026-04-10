@@ -119,16 +119,16 @@ void printKeys_postOrder(Node * root)
     printKeys_postOrder(root->right);
     printf("%d ", root->key);
 }
-void printTreeWithSpacing(Node * root, size_t level)
+void printTree(Node * root, size_t level)
 {
     if (root == NULL) { return; }
 
     for (size_t i = 0; i < level; i++) { printf("\t"); }
     printf("%d\n", root->key);
-    printTreeWithSpacing(root->left, level + 1);
-    printTreeWithSpacing(root->right, level + 1);
+    printTree(root->left, level + 1);
+    printTree(root->right, level + 1);
 }
-void printTreeWithSpacingAndLabels(Node * root, size_t level, int side)
+void printTree_labels(Node * root, size_t level, int side)
 {
     if (root == NULL) { return; }
 
@@ -141,8 +141,40 @@ void printTreeWithSpacingAndLabels(Node * root, size_t level, int side)
         case 1: printf(">> %d\n", root->key); break;
     }
 
-    printTreeWithSpacingAndLabels(root->left, level + 1, -1);
-    printTreeWithSpacingAndLabels(root->right, level + 1, 1);
+    printTree_labels(root->left, level + 1, -1);
+    printTree_labels(root->right, level + 1, 1);
+}
+int max(int x, int y)
+{
+    return (x > y) ? x : y;
+}
+int calcHeight(Node * node)
+{
+    if (node == NULL) { return 0; }
+
+    return 1 + max(calcHeight(node->left), calcHeight(node->right));
+}
+int calcBalanceFactor(Node * node)
+{
+    if (node == NULL) { return 0; }
+
+    return calcHeight(node->left) - calcHeight(node->right);
+}
+void printTree_info(Node * root, size_t level, int side)
+{
+    if (root == NULL) { return; }
+
+    for (size_t i = 0; i < level; i++) { printf("\t"); }
+    
+    switch (side)
+    {
+        case -1: printf("<< %d [h=%d, bf=%d]\n", root->key, calcHeight(root), calcBalanceFactor(root)); break;
+        case 0: printf("%d [h=%d, bf=%d]\n", root->key, calcHeight(root), calcBalanceFactor(root)); break;
+        case 1: printf(">> %d [h=%d, bf=%d]\n", root->key, calcHeight(root), calcBalanceFactor(root)); break;
+    }
+
+    printTree_info(root->left, level + 1, -1);
+    printTree_info(root->right, level + 1, 1);
 }
 
 
@@ -192,5 +224,5 @@ void bst_print_postOrder(BST * bst)
 }
 void bst_visualize(BST * bst)
 {
-    printTreeWithSpacingAndLabels(bst->root, 0, 0);
+    printTree_info(bst->root, 0, 0);
 }

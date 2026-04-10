@@ -14,14 +14,6 @@ int main(void)
     }
 
     bst_visualize(t);
-    bst_print_inOrder(t);
-    bst_remove(t, 13);
-    bst_remove(t, 10);
-    bst_remove(t, 6);
-    bst_remove(t, 8);
-    bst_remove(t, 0);
-    bst_visualize(t);
-    bst_print_inOrder(t);
 
     bst_delete(t);
 
